@@ -24,3 +24,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Updload to Packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: Mod
+        path: ./build/libs/extralife-0.0.1.jar
