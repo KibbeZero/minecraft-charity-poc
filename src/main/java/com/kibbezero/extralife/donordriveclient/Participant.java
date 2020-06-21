@@ -164,4 +164,8 @@ public class Participant implements Serializable
         this.numDonations = numDonations;
     }
 
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }

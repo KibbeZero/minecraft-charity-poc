@@ -1,6 +1,7 @@
 package com.kibbezero.extralife;
 
 import com.kibbezero.extralife.donordriveclient.Connection;
+import com.kibbezero.extralife.donordriveclient.Donation;
 import com.kibbezero.extralife.donordriveclient.Participant;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -58,7 +60,7 @@ public class ExtraLife
     private void enqueueIMC(final InterModEnqueueEvent event)
     {
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("examplemod", "helloworld", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
+        InterModComms.sendTo("extralife", "helloworld", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
     }
 
     private void processIMC(final InterModProcessEvent event)
@@ -72,14 +74,21 @@ public class ExtraLife
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         // do something when the server starts
-        Connection donorConnection = new Connection("https://extralife.donordrive.com");
+        Connection donorConnection = new Connection("https://try.donordrive.com");
         LOGGER.info(String.format("Loaded DonorDrive Connection: %s",donorConnection.getDonorSite()));
 
         try {
-            Participant kibbe = donorConnection.getParticipant("403971");
-            LOGGER.info(String.format("Found %s! Participant ID: %s", kibbe.getDisplayName(), kibbe.getParticipantID()));
+            Participant participant = donorConnection.getParticipant("19793");
+            LOGGER.info(String.format("Found %s! Participant ID: %s", participant.getDisplayName(), participant.getParticipantID()));
+
+            Participant[] codeMonkeys = donorConnection.getTeamParticipants("8897");
+            LOGGER.info(Arrays.toString(codeMonkeys));
+
+            Donation[] donations = donorConnection.getParticipantDonations("19793");
+            LOGGER.info(Arrays.toString(donations));
+
         } catch (IOException exception) {
-            LOGGER.error("Cannot get participant.", exception);
+            LOGGER.error("Cannot get data from Donor Drive.", exception);
         }
         LOGGER.info("HELLO from server starting");
     }

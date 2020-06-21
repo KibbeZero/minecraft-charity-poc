@@ -13,7 +13,7 @@ public class Connection {
     private static final String API_VERSION = "1.1";
 
     //region Static URIs
-
+    //@todo: I hate having to assume "api" here, but URL class will just drop the api if you present it as part of the base URL. I want to figure out how to do this.
     private static final String TEAM_PARTICIPANTS_URI = "api/teams/%s/participants"; //Format with team ID. For ExtraLife2020 our ID is 50922
     private static final String PARTICIPANT_URI = "api/participants/%s"; //Format with a participant ID. KibbeZero's participant ID is 403971
     private static final String PARTICIPANT_DONATIONS_URI = "api/participants/%s/donations";
@@ -54,5 +54,30 @@ public class Connection {
         }
     }
 
+    public Participant[] getTeamParticipants(String teamId) throws IOException {
+
+        URL teamListURL = new URL(getDonorSite(), String.format(TEAM_PARTICIPANTS_URI, teamId));
+        try {
+            Reader reader = new InputStreamReader(teamListURL.openStream());
+            return new Gson().fromJson(reader, Participant[].class);
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IOException("Something went wrong parsing Json response. you may have had a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
+        }
+    }
+
+    public Donation[] getParticipantDonations(String participantId) throws IOException {
+
+        URL donationListURL = new URL(getDonorSite(), String.format(PARTICIPANT_DONATIONS_URI, participantId));
+        try {
+            Reader reader = new InputStreamReader(donationListURL.openStream());
+            return new Gson().fromJson(reader, Donation[].class);
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IOException("Something went wrong parsing Json response. you may have had a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
+        }
+    }
 
 }
