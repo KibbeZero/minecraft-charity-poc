@@ -1,5 +1,7 @@
 package com.kibbezero.extralife;
 
+import com.kibbezero.extralife.donordriveclient.Connection;
+import com.kibbezero.extralife.donordriveclient.Participant;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,6 +18,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -26,6 +29,7 @@ public class ExtraLife
     private static final Logger LOGGER = LogManager.getLogger();
 
     public ExtraLife() {
+
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -68,6 +72,15 @@ public class ExtraLife
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         // do something when the server starts
+        Connection donorConnection = new Connection("https://extralife.donordrive.com");
+        LOGGER.info(String.format("Loaded DonorDrive Connection: %s",donorConnection.getDonorSite()));
+
+        try {
+            Participant kibbe = donorConnection.getParticipant("403971");
+            LOGGER.info(String.format("Found %s! Participant ID: %s", kibbe.getDisplayName(), kibbe.getParticipantID()));
+        } catch (IOException exception) {
+            LOGGER.error("Cannot get participant.", exception);
+        }
         LOGGER.info("HELLO from server starting");
     }
 
