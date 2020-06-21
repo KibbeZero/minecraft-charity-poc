@@ -29,11 +29,3 @@ jobs:
       with:
         name: Mod
         path: ./build/libs/extralife-0.0.1.jar
-    - name: FTP Upload
-      uses: SamKirkland/FTP-Deploy-Actions@3.1.1
-      with:
-        ftp-server: ${{ secrets.FTP_SERVER }}
-        ftp-username: ${{ secrets.FTP_USERNAME }}
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./build/libs/
-
