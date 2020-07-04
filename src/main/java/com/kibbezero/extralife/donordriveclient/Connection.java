@@ -26,7 +26,6 @@ public class Connection {
     private static final String WHERE_PARAMETER = "&where=%s"; // Uses "SQL-style" rules. See https://github.com/DonorDrive/PublicAPI/tree/master/docs/1.1
     //endregion
 
-
     private URL donorURL; // Test Data is https://try.donordrive.com ; Extra Life is https://extralife.donordrive.com
     private void setDonorURL(String baseURL) throws MalformedURLException {
         donorURL = new URL(baseURL);
