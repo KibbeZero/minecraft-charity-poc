@@ -3,6 +3,7 @@ package com.kibbezero.extralife;
 import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Donation;
 import com.kibbezero.extralife.donordriveclient.Participant;
+import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
@@ -39,26 +40,27 @@ public class ExtraLife
 
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 
-        // Register the setup method for modloading
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        // Register the enqueueIMC method for modloading
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-        // Register the processIMC method for modloading
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onServerStarting);
 
-        // Register ourselves for server and other game events we are interested in
+
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void setup(final FMLCommonSetupEvent event)
     {
-        // some preinit code
+
         LOGGER.info("HELLO FROM PREINIT");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
 
         donorConnection = new Connection("https://try.donordrive.com");
+        DonorDriveTagCapability.register();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
@@ -76,7 +78,7 @@ public class ExtraLife
     }
 
     public void onServerStarting(final FMLDedicatedServerSetupEvent event) {
-        // do something when the server starts
+
 
         LOGGER.info(String.format("Loaded DonorDrive Connection: %s",donorConnection.getDonorSite()));
 
@@ -96,8 +98,6 @@ public class ExtraLife
         LOGGER.info("HELLO from server starting");
     }
 
-    // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
-    // Event bus for receiving Registry Events)
     @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD, value=Dist.DEDICATED_SERVER)
     public static class RegistryEvents {
         @SubscribeEvent
