@@ -6,9 +6,7 @@ import com.kibbezero.extralife.donordriveclient.Participant;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.InterModComms;
@@ -18,6 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.commons.lang3.tuple.Pair;
@@ -34,7 +33,7 @@ public class ExtraLife
 {
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
-    private Connection donorConnection;
+    private Connection donorConnection; //Initialized during onServerStart
 
     public ExtraLife() {
 
@@ -47,10 +46,13 @@ public class ExtraLife
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onServerStarting);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onDedicatedServerStarting);
+
+
 
 
         MinecraftForge.EVENT_BUS.register(this);
+
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -77,7 +79,10 @@ public class ExtraLife
                 collect(Collectors.toList()));
     }
 
-    public void onServerStarting(final FMLDedicatedServerSetupEvent event) {
+
+
+    public void onDedicatedServerStarting(final FMLDedicatedServerSetupEvent event) {
+        
 
 
         LOGGER.info(String.format("Loaded DonorDrive Connection: %s",donorConnection.getDonorSite()));
@@ -96,14 +101,7 @@ public class ExtraLife
             LOGGER.error("Cannot get data from Donor Drive.", exception);
         }
         LOGGER.info("HELLO from server starting");
-    }
 
-    @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD, value=Dist.DEDICATED_SERVER)
-    public static class RegistryEvents {
-        @SubscribeEvent
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-            // register a new block here
-            LOGGER.info("HELLO from Register Block");
-        }
+
     }
 }
