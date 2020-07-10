@@ -3,6 +3,8 @@ package com.kibbezero.extralife;
 import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Donation;
 import com.kibbezero.extralife.donordriveclient.Participant;
+import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,29 +39,30 @@ public class ExtraLife
 
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 
-        // Register the setup method for modloading
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        // Register the enqueueIMC method for modloading
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-        // Register the processIMC method for modloading
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onDedicatedServerStarting);
 
 
 
-        // Register ourselves for server and other game events we are interested in
+
         MinecraftForge.EVENT_BUS.register(this);
 
     }
 
     private void setup(final FMLCommonSetupEvent event)
     {
-        // some preinit code
+
         LOGGER.info("HELLO FROM PREINIT");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
 
         donorConnection = new Connection("https://try.donordrive.com");
+        DonorDriveTagCapability.register();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
@@ -76,13 +79,11 @@ public class ExtraLife
                 collect(Collectors.toList()));
     }
 
-    @SubscribeEvent
-    public static void onServerStarting(final FMLServerStartingEvent event) {
-        ServerCommands.register(event.getCommandDispatcher());
-    }
+
 
     public void onDedicatedServerStarting(final FMLDedicatedServerSetupEvent event) {
-        // do something when the server starts
+        
+
 
         LOGGER.info(String.format("Loaded DonorDrive Connection: %s",donorConnection.getDonorSite()));
 
