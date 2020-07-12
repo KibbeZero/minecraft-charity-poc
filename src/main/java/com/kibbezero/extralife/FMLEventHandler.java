@@ -27,9 +27,6 @@ public class FMLEventHandler {
 
         if(event.getObject() instanceof ServerPlayerEntity){
             event.addCapability(new ResourceLocation("extralife", "donordriveid"), new DonorDriveTagCapability());
-            ServerPlayerEntity me = (ServerPlayerEntity)event.getObject();
-            me.getServerWorld();
-            
         }
 
 
