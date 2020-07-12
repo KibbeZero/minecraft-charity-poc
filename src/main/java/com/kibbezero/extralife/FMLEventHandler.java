@@ -1,5 +1,6 @@
 package com.kibbezero.extralife;
 
+import com.kibbezero.extralife.donordriveclient.Scheduler;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import com.kibbezero.extralife.servercommands.ServerCommands;
 import net.minecraft.entity.Entity;
@@ -8,6 +9,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -40,6 +43,13 @@ public class FMLEventHandler {
             event.getOriginal().getCapability(DonorDriveTagCapability.DONOR_DRIVE_TAG_CAPABILITY, null)
                     .ifPresent(source -> player.getCapability(DonorDriveTagCapability.DONOR_DRIVE_TAG_CAPABILITY, null)
                     .ifPresent(newDonorDriveTag -> newDonorDriveTag.setPlayerAssociation(source.getDonorDriveId())));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onTick(WorldTickEvent event) {
+        if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
+            Scheduler.updateTick();
         }
     }
 }
