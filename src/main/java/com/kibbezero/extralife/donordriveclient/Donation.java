@@ -35,6 +35,22 @@ public class Donation implements Serializable
     @SerializedName("donationID")
     @Expose
     private String donationID;
+
+    public String getIncentiveID() {
+        if(incentiveID == null){
+            return "";
+        }
+        return incentiveID;
+    }
+
+    public void setIncentiveID(String incentiveID) {
+        this.incentiveID = incentiveID;
+    }
+
+    @SerializedName("incentiveID")
+    @Expose
+    private String incentiveID;
+
     private final static long serialVersionUID = -6147877872862817704L;
 
     //Not part of the spec, but I need this to determine if we need to trigger an event for the donation
@@ -48,12 +64,16 @@ public class Donation implements Serializable
         this.displayName = displayName;
     }
 
-    public Integer getParticipantID() {
-        return participantID;
+    public String getParticipantID() {
+        return participantID.toString();
     }
 
     public void setParticipantID(Integer participantID) {
         this.participantID = participantID;
+    }
+
+    public void setParticipantID(String participantID) {
+        this.participantID = Integer.parseInt(participantID);
     }
 
     public Double getAmount() {

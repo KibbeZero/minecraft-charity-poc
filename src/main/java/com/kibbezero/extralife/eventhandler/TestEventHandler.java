@@ -1,4 +1,4 @@
-package com.kibbezero.extralife.servercommands;
+package com.kibbezero.extralife.eventhandler;
 
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

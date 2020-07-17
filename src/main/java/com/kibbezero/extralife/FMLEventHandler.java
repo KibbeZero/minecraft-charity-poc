@@ -49,7 +49,7 @@ public class FMLEventHandler {
     @SubscribeEvent
     public static void onTick(WorldTickEvent event) {
         if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
-            Scheduler.updateTick();
+            Scheduler.updateTick(event.world);
         }
     }
 }
