@@ -37,6 +37,9 @@ public class Donation implements Serializable
     private String donationID;
     private final static long serialVersionUID = -6147877872862817704L;
 
+    //Not part of the spec, but I need this to determine if we need to trigger an event for the donation
+    private boolean eventTriggered = false;
+
     public String getDisplayName() {
         return displayName;
     }
@@ -108,6 +111,10 @@ public class Donation implements Serializable
     public void setDonationID(String donationID) {
         this.donationID = donationID;
     }
+
+    public void setEventTriggered(boolean eventTriggered) {this.eventTriggered = eventTriggered;}
+
+    public boolean getEventTriggered() { return eventTriggered; }
 
     @Override
     public String toString() {
