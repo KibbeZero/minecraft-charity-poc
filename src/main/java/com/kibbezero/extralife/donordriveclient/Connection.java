@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 public class Connection {
 
@@ -44,7 +45,10 @@ public class Connection {
 
         URL participantURL = new URL(getDonorSite(), String.format(PARTICIPANT_URI, participantId));
         try {
-            Reader reader = new InputStreamReader(participantURL.openStream());
+            URLConnection connection = participantURL.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            connection.connect();
+            Reader reader = new InputStreamReader(connection.getInputStream());
             return new Gson().fromJson(reader, Participant.class);
         } catch (IOException exception) {
             throw exception;
@@ -57,7 +61,10 @@ public class Connection {
 
         URL teamListURL = new URL(getDonorSite(), String.format(TEAM_PARTICIPANTS_URI, teamId));
         try {
-            Reader reader = new InputStreamReader(teamListURL.openStream());
+            URLConnection connection = teamListURL.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            connection.connect();
+            Reader reader = new InputStreamReader(connection.getInputStream());
             return new Gson().fromJson(reader, Participant[].class);
         } catch (IOException exception) {
             throw exception;
@@ -70,7 +77,10 @@ public class Connection {
 
         URL donationListURL = new URL(getDonorSite(), String.format(PARTICIPANT_DONATIONS_URI, participantId));
         try {
-            Reader reader = new InputStreamReader(donationListURL.openStream());
+            URLConnection connection = donationListURL.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            connection.connect();
+            Reader reader = new InputStreamReader(connection.getInputStream());
             return new Gson().fromJson(reader, Donation[].class);
         } catch (IOException exception) {
             throw exception;
