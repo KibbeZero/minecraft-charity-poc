@@ -1,4 +1,8 @@
-package com.kibbezero.extralife.donordriveclient;
+package com.kibbezero.extralife.eventhandler;
+
+import com.kibbezero.extralife.donordriveclient.Connection;
+import com.kibbezero.extralife.donordriveclient.Donation;
+import com.kibbezero.extralife.donordriveclient.Participant;
 
 import java.io.IOException;
 import java.util.ArrayList;

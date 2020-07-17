@@ -1,7 +1,7 @@
 package com.kibbezero.extralife;
 
 import com.kibbezero.extralife.donordriveclient.Connection;
-import com.kibbezero.extralife.donordriveclient.Scheduler;
+import com.kibbezero.extralife.eventhandler.Scheduler;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ExtensionPoint;

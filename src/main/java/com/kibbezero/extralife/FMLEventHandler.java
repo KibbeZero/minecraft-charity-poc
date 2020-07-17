@@ -1,6 +1,6 @@
 package com.kibbezero.extralife;
 
-import com.kibbezero.extralife.donordriveclient.Scheduler;
+import com.kibbezero.extralife.eventhandler.Scheduler;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import com.kibbezero.extralife.servercommands.ServerCommands;
 import net.minecraft.entity.Entity;
