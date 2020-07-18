@@ -76,4 +76,21 @@ public class Connection implements IConnection {
         }
     }
 
+    public Incentive[] getParticipantIncentives(String participantId) throws IOException {
+
+        URL incentiveListURL = new URL(getDonorSite(), String.format(PARTICIPANT_INCENTIVES_URI, participantId));
+
+        try {
+            URLConnection connection = incentiveListURL.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            connection.connect();
+            Reader reader = new InputStreamReader(connection.getInputStream());
+            return new Gson().fromJson(reader, Incentive[].class);
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IOException("Something went wrong parsing Json response. you may have had a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
+        }
+    }
+
 }
