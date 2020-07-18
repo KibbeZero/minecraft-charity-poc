@@ -9,7 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class Connection {
+public class Connection implements IConnection {
 
     private static final String API_VERSION = "1.1";
 
@@ -18,6 +18,7 @@ public class Connection {
     private static final String TEAM_PARTICIPANTS_URI = "api/teams/%s/participants"; //Format with team ID. For ExtraLife2020 our ID is 50922
     private static final String PARTICIPANT_URI = "api/participants/%s"; //Format with a participant ID. KibbeZero's participant ID is 403971
     private static final String PARTICIPANT_DONATIONS_URI = "api/participants/%s/donations";
+    private static final String PARTICIPANT_INCENTIVES_URI = "api/participants/%s/incentives";
     //endregion
 
     //region Static Parameters for Array-based Endpoints
@@ -41,52 +42,37 @@ public class Connection {
         }
     }
 
-    public Participant getParticipant(String participantId) throws IOException {
+    public Participant[] getTeamParticipants(String teamId) throws IOException {
+        URL teamListURL = new URL(getDonorSite(), String.format(TEAM_PARTICIPANTS_URI, teamId));
+        return getEntity(teamListURL, Participant[].class);
+    }
 
+    public Participant getParticipant(String participantId) throws IOException {
         URL participantURL = new URL(getDonorSite(), String.format(PARTICIPANT_URI, participantId));
+        return getEntity(participantURL, Participant.class);
+    }
+
+    public Donation[] getParticipantDonations(String participantId) throws IOException {
+        URL donationListURL = new URL(getDonorSite(), String.format(PARTICIPANT_DONATIONS_URI, participantId));
+        return getEntity(donationListURL, Donation[].class);
+    }
+
+//    public Incentive[] getParticipantIncentives(String participantId) throws IOException {
+//        URL incentiveListURL = new URL(getDonorSite(), String.format(PARTICIPANT_INCENTIVES_URI, participantId));
+//        return getEntity(incentiveListURL, Incentive[].class);
+//    }
+
+    private <T> T getEntity(URL url, Class<T> type) throws IOException {
         try {
-            URLConnection connection = participantURL.openConnection();
+            URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
             connection.connect();
             Reader reader = new InputStreamReader(connection.getInputStream());
-            return new Gson().fromJson(reader, Participant.class);
+            return new Gson().fromJson(reader, type);
         } catch (IOException exception) {
             throw exception;
         } catch (Exception exception) {
             throw new IOException("Something went wrong parsing Json response. You may have a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
         }
     }
-
-    public Participant[] getTeamParticipants(String teamId) throws IOException {
-
-        URL teamListURL = new URL(getDonorSite(), String.format(TEAM_PARTICIPANTS_URI, teamId));
-        try {
-            URLConnection connection = teamListURL.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.connect();
-            Reader reader = new InputStreamReader(connection.getInputStream());
-            return new Gson().fromJson(reader, Participant[].class);
-        } catch (IOException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new IOException("Something went wrong parsing Json response. you may have had a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
-        }
-    }
-
-    public Donation[] getParticipantDonations(String participantId) throws IOException {
-
-        URL donationListURL = new URL(getDonorSite(), String.format(PARTICIPANT_DONATIONS_URI, participantId));
-        try {
-            URLConnection connection = donationListURL.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.connect();
-            Reader reader = new InputStreamReader(connection.getInputStream());
-            return new Gson().fromJson(reader, Donation[].class);
-        } catch (IOException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new IOException("Something went wrong parsing Json response. you may have had a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
-        }
-    }
-
 }
