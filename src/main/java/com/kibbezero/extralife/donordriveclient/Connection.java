@@ -42,14 +42,14 @@ public class Connection implements IConnection {
         }
     }
 
-    public Participant[] getTeamParticipants(String teamId) throws IOException {
-        URL teamListURL = new URL(getDonorSite(), String.format(TEAM_PARTICIPANTS_URI, teamId));
-        return getEntity(teamListURL, Participant[].class);
-    }
-
     public Participant getParticipant(String participantId) throws IOException {
         URL participantURL = new URL(getDonorSite(), String.format(PARTICIPANT_URI, participantId));
         return getEntity(participantURL, Participant.class);
+    }
+
+    public Participant[] getTeamParticipants(String teamId) throws IOException {
+        URL teamListURL = new URL(getDonorSite(), String.format(TEAM_PARTICIPANTS_URI, teamId));
+        return getEntity(teamListURL, Participant[].class);
     }
 
     public Donation[] getParticipantDonations(String participantId) throws IOException {
