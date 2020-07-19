@@ -1,6 +1,6 @@
 package com.kibbezero.extralife;
 
-import com.kibbezero.extralife.donordriveclient.Scheduler;
+import com.kibbezero.extralife.eventhandler.Scheduler;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import com.kibbezero.extralife.servercommands.ServerCommands;
 import net.minecraft.entity.Entity;
@@ -49,7 +49,7 @@ public class FMLEventHandler {
     @SubscribeEvent
     public static void onTick(WorldTickEvent event) {
         if (event.side.isServer() && event.phase == TickEvent.Phase.END) {
-            Scheduler.updateTick();
+            Scheduler.updateTick(event.world);
         }
     }
 }

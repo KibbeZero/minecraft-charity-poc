@@ -4,6 +4,7 @@ import com.kibbezero.extralife.blocks.ModBlocks;
 import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Scheduler;
 import com.kibbezero.extralife.items.ModItems;
+import com.kibbezero.extralife.eventhandler.Scheduler;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;

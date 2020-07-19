@@ -57,10 +57,10 @@ public class Connection implements IConnection {
         return getEntity(donationListURL, Donation[].class);
     }
 
-//    public Incentive[] getParticipantIncentives(String participantId) throws IOException {
-//        URL incentiveListURL = new URL(getDonorSite(), String.format(PARTICIPANT_INCENTIVES_URI, participantId));
-//        return getEntity(incentiveListURL, Incentive[].class);
-//    }
+    public Incentive[] getParticipantIncentives(String participantId) throws IOException {
+        URL incentiveListURL = new URL(getDonorSite(), String.format(PARTICIPANT_INCENTIVES_URI, participantId));
+        return getEntity(incentiveListURL, Incentive[].class);
+    }
 
     private <T> T getEntity(URL url, Class<T> type) throws IOException {
         try {
@@ -75,4 +75,7 @@ public class Connection implements IConnection {
             throw new IOException("Something went wrong parsing Json response. You may have a bad URL (Extralife just redirects if it finds a malformed URL)", exception);
         }
     }
+
+
+
 }
