@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item":  "minecraft:wooden_sword"},
+    {"item":  "minecraft:dirt"},
+    {"item":  "minecraft:cobblestone"},
+    {"item":  "minecraft:gold_nugget"}
+  ],
+  "result": {
+    "item": "extralife:winkle_poop_block",
+    "count": 1
+  }
+}

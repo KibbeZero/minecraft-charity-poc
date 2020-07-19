@@ -1,8 +1,12 @@
 package com.kibbezero.extralife;
 
+import com.kibbezero.extralife.blocks.ModBlocks;
 import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Scheduler;
+import com.kibbezero.extralife.items.ModItems;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -34,6 +38,9 @@ public class ExtraLife
 
         MinecraftForge.EVENT_BUS.register(this);
 
+        // Register custom blocks and items
+        ModBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ModItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
     private void setup(final FMLCommonSetupEvent event) {
