@@ -20,8 +20,7 @@ import java.util.HashMap;
 public class Scheduler {
 
     private static long ticks = 0;
-    private static ArrayList<Participant> participants;
-    private static HashMap<String, Donation[]> donations;
+    private static HashMap<String, Donation> donations = new HashMap<>();
     private static final Logger LOGGER = LogManager.getLogger();
 
 
@@ -29,13 +28,13 @@ public class Scheduler {
         Connection connection = new Connection("https://extralife.donordrive.com");
         donations = new HashMap<>();
         try {
-            participants = new ArrayList<>(Arrays.asList(connection.getTeamParticipants("50922")));
+            ArrayList<Participant> participants = new ArrayList<>(Arrays.asList(connection.getTeamParticipants("50922")));
             for (Participant participant : participants){
                 Donation[] donationList = connection.getParticipantDonations(participant.getParticipantID());
-                for (Donation donation : donationList) {
-                    donation.setEventTriggered(true); //When the server starts, we assume all donations before the server started are complete
+
+                for(Donation donation: donationList) {
+                    donations.put(donation.getDonationID(), donation);
                 }
-                donations.put(participant.getParticipantID(), donationList);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,46 +46,23 @@ public class Scheduler {
         if (ticks >= 1200){
             Connection connection = new Connection("https://extralife.donordrive.com");
             try {
-                for (Participant participant : participants){
+                for (Participant participant : connection.getTeamParticipants("50922")){
                     Donation[] donationsRemote = connection.getParticipantDonations(participant.getParticipantID());
-                    Donation[] donationsLocal = donations.getOrDefault(participant.getParticipantID(), null);
-                    if (donationsLocal == null) {
-                        for (Donation donation : donationsRemote) {
-                            donation.setEventTriggered(true);
-                        }
-                        donations.put(participant.getParticipantID(), donationsRemote);
-                    } else {
-                        for (Donation donation : donationsRemote) {
-                            boolean triggeredEvent = false;
-                            for (Donation previousDonation : donationsLocal) {
-                                if(previousDonation.getDonationID().equals(donation.getDonationID())) {
-                                    if (!previousDonation.getEventTriggered()) {
-                                        if(!triggeredEvent) {
-                                            for (PlayerEntity player:world.getPlayers()) {
-                                                //noinspection ConstantConditions
-                                                player.getCapability(DonorDriveTagCapability.DONOR_DRIVE_TAG_CAPABILITY).ifPresent(capability -> {
-                                                    if(capability.getDonorDriveId().equals(previousDonation.getParticipantID())){
 
-                                                        ProcessDonationEvent(player, donation);
-                                                        previousDonation.setEventTriggered(true);
-                                                    }
-                                                });
-                                            }
-                                            if(previousDonation.getEventTriggered()){
-                                                triggeredEvent = true;
-                                            }
-                                        } else {
-                                            donation.setEventTriggered(previousDonation.getEventTriggered());
-                                        }
-                                    } else {
-                                        donation.setEventTriggered(true);
+                    for (Donation remoteDonation : donationsRemote) {
+                        if(!donations.containsKey(remoteDonation.getDonationID())) {
+                            for (PlayerEntity player:world.getPlayers()) {
+                                //noinspection ConstantConditions
+                                player.getCapability(DonorDriveTagCapability.DONOR_DRIVE_TAG_CAPABILITY).ifPresent(capability -> {
+                                    if(capability.getDonorDriveId().equals(remoteDonation.getParticipantID())){
+                                        ProcessDonationEvent(player, remoteDonation);
+                                        donations.put(remoteDonation.getDonationID(), remoteDonation);
                                     }
-                                }
+                                });
                             }
-
                         }
-                        donations.replace(participant.getParticipantID(), donationsRemote);
                     }
+
                 }
             } catch (IOException e) {
                 LOGGER.error(e);
@@ -108,7 +84,7 @@ public class Scheduler {
                 Incentive [] incentives = connection.getParticipantIncentives(donation.getParticipantID());
                 if (incentives != null) {
                     for (Incentive incentive : incentives) {
-                        if (incentive.getAmount() <= donation.getAmount()) {
+                        if (incentive.getAmount() >= donation.getAmount()) {
                             chosenIncentiveId = incentive.getIncentiveID();
                         }
                     }
