@@ -2,7 +2,6 @@ package com.kibbezero.extralife.eventhandler;
 
 import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Donation;
-import com.kibbezero.extralife.donordriveclient.Incentive;
 import com.kibbezero.extralife.donordriveclient.Participant;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
 import net.minecraft.entity.player.PlayerEntity;
@@ -76,32 +75,38 @@ public class Scheduler {
 
         Connection connection = new Connection("https://extralife.donordrive.com");
 
-        try {
+        String chosenIncentiveId = donation.getIncentiveID();
 
-            String chosenIncentiveId = "";
-
-            if (donation.getIncentiveID().isEmpty()){
-                Incentive [] incentives = connection.getParticipantIncentives(donation.getParticipantID());
-                if (incentives != null) {
-                    for (Incentive incentive : incentives) {
-                        if (incentive.getAmount() >= donation.getAmount()) {
-                            chosenIncentiveId = incentive.getIncentiveID();
-                        }
-                    }
-                }
+        if (chosenIncentiveId.isEmpty()){
+            double amount = donation.getAmount();
+            if (amount >= 100.0) {
+                //The Wither spawns somewhere in the overworld
+            } else if (amount == 77.77) {
+                //Give the player a stack of gold, a stack of diamond, a stack of emerald, and a stack of ender pearls
+            } else if (amount >= 75.0) {
+                //Totem of Resurrection + full set of enchanted armor
+            } else if (amount == 66.66) {
+                //Your entire inventory turns to poop
+            } else if (amount >= 50.0) {
+                //Weapon or armor with random enchants
+            } else if (amount >= 25.0) {
+                //Start new round of Feast or Famine or change up everyone's targets
+            } else if (amount >= 15.0) {
+                //Give random task the player can complete for random amount of points
+            } else if (amount >= 10.0) {
+                //give random stack of mid-level metal (not diamond or emerald)
+            } else if (amount == 6.66) {
+                //Smite the person
+            } else if (amount >= 5.0) {
+                //give random building blocks or decorations
             }
-
-            if (chosenIncentiveId.isEmpty()) {
-                return;
-            }
-
+        } else {
             if(chosenIncentiveId.equals("A85C9A9C-EDA2-2ECC-F952F2E458322C57")) {
                 Item[] items = {Items.GRAVEL};
                 GiveRandomItemEvent.giveRandomItem(player, items, 1, 64);
             }
-        } catch (IOException exception) {
-            LOGGER.error(exception);
         }
+
 
     }
 }
