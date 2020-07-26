@@ -13,7 +13,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -159,9 +164,39 @@ public class Scheduler {
                 GiveRandomItemEvent.giveItem(player, equipmentItem);
                 player.sendMessage(new StringTextComponent("You got a donation that granted you an item!"));
             } else if (amount >= 25.0) {
-                //Start new round of Feast or Famine or change up everyone's targets
+                PlayerList playerList = Objects.requireNonNull(player.getServer()).getPlayerList();
+                playerList.sendMessage(new StringTextComponent("You have a new Feast or Famine Target"), true);
+                for(ServerPlayerEntity serverPlayer: playerList.getPlayers()) {
+                    ItemStack book = new ItemStack(Items.WRITTEN_BOOK, 1);
+                    CompoundNBT bookTag = book.getOrCreateTag();
+                    bookTag.putString("author", serverPlayer.getGameProfile().getName());
+                    bookTag.putString("title", "Feast or Famine Target");
+                    ListNBT pages = new ListNBT();
+                    pages.add(0, StringNBT.valueOf(ITextComponent.Serializer.toJson(new StringTextComponent("On the next page will be your target. Follow the instructions before you die to get the points."))));
+
+                    int playerIndex = -1;
+                    while(playerIndex == -1 || (playerList.getPlayers().get(playerIndex) == serverPlayer && playerList.getCurrentPlayerCount() > 1)) {
+                        playerIndex = serverPlayer.getEntityWorld().getRandom().nextInt(playerList.getCurrentPlayerCount());
+                    }
+                    ServerPlayerEntity target = playerList.getPlayers().get(playerIndex);
+                    boolean isFeast = serverPlayer.getServerWorld().getRandom().nextBoolean();
+                    String feastOrFamineLine;
+                    if(isFeast) {
+                        ItemStack targetItem = GiveRandomItemEvent.getRandomItemStack(serverPlayer.getServerWorld(), ForgeRegistries.ITEMS.getValues().stream().filter(item -> item.getGroup() != null && (item.getGroup().equals(ItemGroup.BUILDING_BLOCKS) || item.getGroup().equals(ItemGroup.DECORATIONS) || item.getGroup().equals(ItemGroup.TOOLS) || item.getGroup().equals(ItemGroup.COMBAT))).toArray(Item[]::new), 1, 64);
+                        assert targetItem != null;
+                        feastOrFamineLine = "Give " + target.getGameProfile().getName() + " " + targetItem.getCount() + " " + targetItem.getDisplayName().getFormattedText();
+                    } else {
+                        feastOrFamineLine = "Kill " + target.getGameProfile().getName();
+                    }
+                    pages.add(1, StringNBT.valueOf(ITextComponent.Serializer.toJson(new StringTextComponent(feastOrFamineLine))));
+                    bookTag.put("pages", pages);
+                    GiveRandomItemEvent.giveItem(serverPlayer, book);
+                }
+
             } else if (amount >= 15.0) {
-                //Give random task the player can complete for random amount of points
+
+
+
             } else if (amount >= 10.0) {
                 Item[] items = new Item[] {Items.GOLD_INGOT, Items.IRON_INGOT};
                 GiveRandomItemEvent.giveRandomItem(player, items, 32, 64);
@@ -177,7 +212,11 @@ public class Scheduler {
                 LightningBoltEntity no = new LightningBoltEntity(world, playerx, playery, playerz, false);
                 world.addLightningBolt(no);
             } else if (amount >= 5.0) {
-
+                ItemStack materialItem = GiveRandomItemEvent.getRandomItemStack(player.getEntityWorld(), ForgeRegistries.ITEMS.getValues().stream().filter(item -> item.getGroup() != null && (item.getGroup().equals(ItemGroup.BUILDING_BLOCKS) || item.getGroup().equals(ItemGroup.DECORATIONS))).toArray(Item[]::new), 64, 64);
+                for (int i = 0; i < 6; i++) {
+                    assert materialItem != null;
+                    GiveRandomItemEvent.giveItem(player, materialItem.copy());
+                }
             }
         } else {
             if(chosenIncentiveId.equals("A85C9A9C-EDA2-2ECC-F952F2E458322C57")) {
