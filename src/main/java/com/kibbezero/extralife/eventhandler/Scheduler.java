@@ -195,7 +195,26 @@ public class Scheduler {
 
             } else if (amount >= 15.0) {
 
-
+                ItemStack book = new ItemStack(Items.WRITTEN_BOOK, 1);
+                CompoundNBT bookTag = book.getOrCreateTag();
+                bookTag.putString("author", player.getGameProfile().getName());
+                bookTag.putString("title", "Do this thing, get some Points");
+                ListNBT pages = new ListNBT();
+                LinkedList<String> optionsList = new LinkedList<>();
+                optionsList.add("Build a tower to the sky. 10 points");
+                optionsList.add("Lose an arena match. 25 points");
+                optionsList.add("Donate to another player's page. 100 points");
+                optionsList.add("Complete a full beacon tower with Gold blocks. 100 points");
+                optionsList.add("Swim in lava for 30 seconds. 35 points");
+                optionsList.add("Hit someone with a snowball. 5 points");
+                optionsList.add("Create an underwater base. 100 points");
+                optionsList.add("Spend 6 Minecraft days underground. 50 points");
+                optionsList.add("Stay off of non-plant blocks for 6 Minecraft days. 50 points");
+                int pickedIndex = player.getEntityWorld().getRandom().nextInt(optionsList.size());
+                pages.add(0, StringNBT.valueOf(ITextComponent.Serializer.toJson(new StringTextComponent("On the next page will see a task to perform and how many points it is worth. These tasks are optional you must destroy the book before you receive the points."))));
+                pages.add(1, StringNBT.valueOf(ITextComponent.Serializer.toJson(new StringTextComponent(optionsList.get(pickedIndex)))));
+                bookTag.put("pages", pages);
+                GiveRandomItemEvent.giveItem(player, book);
 
             } else if (amount >= 10.0) {
                 Item[] items = new Item[] {Items.GOLD_INGOT, Items.IRON_INGOT};
