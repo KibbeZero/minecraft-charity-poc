@@ -4,17 +4,26 @@ import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Donation;
 import com.kibbezero.extralife.donordriveclient.Participant;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Scheduler {
 
@@ -80,25 +89,95 @@ public class Scheduler {
         if (chosenIncentiveId.isEmpty()){
             double amount = donation.getAmount();
             if (amount >= 100.0) {
-                //The Wither spawns somewhere in the overworld
+
+                Random random = player.getEntityWorld().getRandom();
+                for (int witherNum = 0; witherNum < 3; witherNum++) {
+                    WitherEntity witherentity = EntityType.WITHER.create(player.getEntityWorld());
+                    BlockPos blockpos = new BlockPos(random.nextInt(5000) - 2500, 80, random.nextInt(5000) - 2500);
+                    assert witherentity != null;
+                    witherentity.setLocationAndAngles((double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.55D, (double) blockpos.getZ() + 0.5D, 0.0F , 0.0F);
+                    witherentity.renderYawOffset = 0.0F;
+                    witherentity.forceSpawn = true;
+                    ((ServerWorld) player.getEntityWorld()).summonEntity(witherentity);
+                    witherentity.ignite();
+                    //noinspection ConstantConditions
+                    player.getServer().getPlayerList().sendMessage(new StringTextComponent("The Wither has been spawned at (" + blockpos.getX() + ", " + blockpos.getZ() + ")."), true);
+                }
             } else if (amount == 77.77) {
-                //Give the player a stack of gold, a stack of diamond, a stack of emerald, and a stack of ender pearls
+                GiveRandomItemEvent.giveRandomItem(player, new Item[] {Items.DIAMOND}, 64, 64);
+                GiveRandomItemEvent.giveRandomItem(player, new Item[] {Items.EMERALD}, 64, 64);
+                GiveRandomItemEvent.giveRandomItem(player, new Item[] {Items.GOLD_INGOT}, 64, 64);
+                GiveRandomItemEvent.giveRandomItem(player, new Item[] {Items.ENDER_PEARL}, 64, 64);
+                //noinspection ConstantConditions
+                player.getEntityWorld().getServer().getPlayerList().sendMessage(new StringTextComponent(player.getGameProfile().getName() + " just received a donation...and you received stacks of valuable materials!"));
+                player.sendMessage(new StringTextComponent("You got a donation that granted you an item!"));
             } else if (amount >= 75.0) {
-                //Totem of Resurrection + full set of enchanted armor
+                GiveRandomItemEvent.giveItem(player, new ItemStack(Items.TOTEM_OF_UNDYING, 1));
+                ItemStack diamondChest = new ItemStack(Items.DIAMOND_CHESTPLATE);
+                GiveRandomItemEvent.giveItemRandomEnchantment(player, diamondChest);
+                GiveRandomItemEvent.giveItem(player, diamondChest);
+
+                ItemStack diamondBoots = new ItemStack(Items.DIAMOND_BOOTS);
+                GiveRandomItemEvent.giveItemRandomEnchantment(player, diamondBoots);
+                GiveRandomItemEvent.giveItem(player, diamondBoots);
+
+                ItemStack diamondHelm = new ItemStack(Items.DIAMOND_HELMET);
+                GiveRandomItemEvent.giveItemRandomEnchantment(player, diamondHelm);
+                GiveRandomItemEvent.giveItem(player, diamondHelm);
+
+                ItemStack diamondLegs = new ItemStack(Items.DIAMOND_LEGGINGS);
+                GiveRandomItemEvent.giveItemRandomEnchantment(player, diamondLegs);
+                GiveRandomItemEvent.giveItem(player, diamondLegs);
+
+                ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
+                GiveRandomItemEvent.giveItemRandomEnchantment(player, diamondSword);
+                GiveRandomItemEvent.giveItem(player, diamondSword);
+
+                //noinspection ConstantConditions
+                player.getEntityWorld().getServer().getPlayerList().sendMessage(new StringTextComponent(player.getGameProfile().getName() + " just received a donation...and now is ready for war!"));
+                player.sendMessage(new StringTextComponent("You got a donation and now you are ready for war!"));
+
             } else if (amount == 66.66) {
-                //Your entire inventory turns to poop
+                if(GiveRandomItemEvent.stealInventory(player)) {
+                    player.sendMessage(new StringTextComponent("Someone just donated to Extra Life.... but I wouldn't look at your inventory if I were you."));
+                } else {
+                    player.sendMessage(new StringTextComponent("Someone just donated to Extra Life! Unfortunately we couldn't find a place to give the 'prize' to you."));
+                }
             } else if (amount >= 50.0) {
-                //Weapon or armor with random enchants
+                List<Item> equipmentList = ForgeRegistries.ITEMS.getValues().stream().filter(item -> item.getGroup() != null && (item.getGroup().equals(ItemGroup.TOOLS) || item.getGroup().equals(ItemGroup.COMBAT))).collect(Collectors.toList());
+                ItemStack equipmentItem = GiveRandomItemEvent.getRandomItemStack(player.getEntityWorld(), equipmentList.toArray(new Item[0]), 1, 1);
+                GiveRandomItemEvent.giveItemRandomEnchantment(player, equipmentItem);
+                int count = 0;
+                while (true) {
+                    assert equipmentItem != null;
+                    if (!(!equipmentItem.isEnchanted() && count < 100)) break;
+                    count++;
+                    equipmentItem = GiveRandomItemEvent.getRandomItemStack(player.getEntityWorld(), equipmentList.toArray(new Item[0]), 1, 1);
+                    GiveRandomItemEvent.giveItemRandomEnchantment(player, equipmentItem);
+                }
+
+                GiveRandomItemEvent.giveItem(player, equipmentItem);
+                player.sendMessage(new StringTextComponent("You got a donation that granted you an item!"));
             } else if (amount >= 25.0) {
                 //Start new round of Feast or Famine or change up everyone's targets
             } else if (amount >= 15.0) {
                 //Give random task the player can complete for random amount of points
             } else if (amount >= 10.0) {
-                //give random stack of mid-level metal (not diamond or emerald)
+                Item[] items = new Item[] {Items.GOLD_INGOT, Items.IRON_INGOT};
+                GiveRandomItemEvent.giveRandomItem(player, items, 32, 64);
+                GiveRandomItemEvent.giveRandomItem(player, items, 32, 64);
+                GiveRandomItemEvent.giveRandomItem(player, items, 32, 64);
+                GiveRandomItemEvent.giveRandomItem(player, items, 32, 64);
             } else if (amount == 6.66) {
-                //Smite the person
+                double playerx = player.chasingPosX;
+                double playery = player.chasingPosY;
+                double playerz = player.chasingPosZ;
+                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+                ServerWorld world = serverPlayer.getServerWorld();
+                LightningBoltEntity no = new LightningBoltEntity(world, playerx, playery, playerz, false);
+                world.addLightningBolt(no);
             } else if (amount >= 5.0) {
-                //give random building blocks or decorations
+
             }
         } else {
             if(chosenIncentiveId.equals("A85C9A9C-EDA2-2ECC-F952F2E458322C57")) {
