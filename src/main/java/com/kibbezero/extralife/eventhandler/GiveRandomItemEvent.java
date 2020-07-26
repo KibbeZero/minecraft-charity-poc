@@ -1,10 +1,14 @@
 package com.kibbezero.extralife.eventhandler;
 
+import com.kibbezero.extralife.blocks.ModBlocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,17 +34,65 @@ public class GiveRandomItemEvent {
         return randomItemStack;
     }
 
+    public static BlockPos getSpotForDoubleChestAbovePlayer (PlayerEntity player) {
+        BlockPos cursor = player.getPosition().up(10);
+
+        while (!player.getEntityWorld().isAirBlock(cursor) && !player.getEntityWorld().isAirBlock(cursor.east())){
+            cursor = cursor.up();
+        }
+
+        if (cursor.getY() > player.getEntityWorld().getMaxHeight()) {
+            //Do nothing
+            return BlockPos.ZERO;
+        }
+
+        return cursor;
+    }
+
     public static void giveRandomItem (PlayerEntity player, Item[] items, int minStack, int maxStack){
         ItemStack item = getRandomItemStack(player.getEntityWorld(), items, minStack, maxStack);
+
+        giveItem(player, item);
+    }
+
+    public static boolean stealInventory (PlayerEntity player) {
+        BlockPos chestPos = getSpotForDoubleChestAbovePlayer(player);
+        if (chestPos.equals(BlockPos.ZERO)) {
+            return false;
+        }
+
+        BlockState block = Blocks.CHEST.getDefaultState();
+        BlockState block2 = Blocks.CHEST.getDefaultState();
+        World world = player.getEntityWorld();
+        world.setBlockState(chestPos, block);
+        world.setBlockState(chestPos.east(), block2);
+
+        final ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(chestPos);
+        final ChestTileEntity chest2 = (ChestTileEntity) world.getTileEntity(chestPos.east());
+        for(int i = 0; i < player.inventory.mainInventory.size(); i++) {
+            ItemStack itemStack = player.inventory.mainInventory.get(i);
+            assert chest != null;
+            if(i < chest.getSizeInventory()) {
+                chest.setInventorySlotContents(i, itemStack);
+            } else {
+                assert chest2 != null;
+                chest2.setInventorySlotContents(i - chest.getSizeInventory(), itemStack);
+            }
+            player.inventory.mainInventory.set(i, getRandomItemStack(world, new Item[] {ModBlocks.WINKLE_POOP_BLOCK.get().asItem()}, 64, 64));
+        }
+        return true;
+    }
+
+    public static ItemStack giveItemRandomEnchantment(PlayerEntity player, ItemStack item) {
+        EnchantmentHelper.addRandomEnchantment(player.getRNG(), item, player.getRNG().nextInt(20) + 10, true);
+        return item;
+    }
+
+
+    public static void giveItem(PlayerEntity player, ItemStack item) {
         if (item != null && !player.inventory.addItemStackToInventory(item)) {
 
             player.dropItem(item, true, true);
         }
-
-
-        //noinspection ConstantConditions
-        player.getEntityWorld().getServer().getPlayerList().sendMessage(new StringTextComponent(player.getGameProfile().getName() + " just received a donation...and some gravel!"));
-        player.sendMessage(new StringTextComponent("You got a donation and some gravel!"));
-        player.playSound(SoundEvents.ENTITY_PLAYER_BURP, 0.5f, 1.0f);
     }
 }
