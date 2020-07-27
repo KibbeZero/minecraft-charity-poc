@@ -4,6 +4,8 @@ import com.kibbezero.extralife.donordriveclient.Connection;
 import com.kibbezero.extralife.donordriveclient.Donation;
 import com.kibbezero.extralife.donordriveclient.Participant;
 import com.kibbezero.extralife.playercapability.DonorDriveTagCapability;
+import jdk.internal.loader.Loader;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.effect.LightningBoltEntity;
@@ -13,15 +15,23 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.client.model.MultiLayerModel;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Scheduler {
 
@@ -52,6 +63,21 @@ public class Scheduler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static Item[] getCraftableItemDonation(World world)
+    {
+        List<?> itemGroups = Arrays.asList(
+                ItemGroup.DECORATIONS,
+                ItemGroup.BUILDING_BLOCKS
+        );
+
+        return world.getRecipeManager().getRecipes()
+                        .stream()
+                        .filter(r -> itemGroups.contains(r.getRecipeOutput().getItem().getGroup()))
+                        .map(r -> r.getRecipeOutput().getItem())
+                        .toArray(Item[]::new);
     }
 
     public static void updateTick(World world){
@@ -231,7 +257,8 @@ public class Scheduler {
                 LightningBoltEntity no = new LightningBoltEntity(world, playerx, playery, playerz, false);
                 world.addLightningBolt(no);
             } else if (amount >= 5.0) {
-                ItemStack materialItem = GiveRandomItemEvent.getRandomItemStack(player.getEntityWorld(), ForgeRegistries.ITEMS.getValues().stream().filter(item -> item.getGroup() != null && (item.getGroup().equals(ItemGroup.BUILDING_BLOCKS) || item.getGroup().equals(ItemGroup.DECORATIONS))).toArray(Item[]::new), 64, 64);
+                ItemStack materialItem = GiveRandomItemEvent.getRandomItemStack(player.getEntityWorld(),
+                        ForgeRegistries.ITEMS.getValues().stream().filter(item -> item.getGroup() != null && (item.getGroup().equals(ItemGroup.BUILDING_BLOCKS) || item.getGroup().equals(ItemGroup.DECORATIONS))).toArray(Item[]::new), 64, 64);
                 for (int i = 0; i < 6; i++) {
                     assert materialItem != null;
                     GiveRandomItemEvent.giveItem(player, materialItem.copy());
