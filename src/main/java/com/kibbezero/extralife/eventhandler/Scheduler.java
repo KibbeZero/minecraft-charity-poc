@@ -257,8 +257,8 @@ public class Scheduler {
                 LightningBoltEntity no = new LightningBoltEntity(world, playerx, playery, playerz, false);
                 world.addLightningBolt(no);
             } else if (amount >= 5.0) {
-                ItemStack materialItem = GiveRandomItemEvent.getRandomItemStack(player.getEntityWorld(),
-                        ForgeRegistries.ITEMS.getValues().stream().filter(item -> item.getGroup() != null && (item.getGroup().equals(ItemGroup.BUILDING_BLOCKS) || item.getGroup().equals(ItemGroup.DECORATIONS))).toArray(Item[]::new), 64, 64);
+                World world = player.getEntityWorld();
+                ItemStack materialItem = GiveRandomItemEvent.getRandomItemStack(world, getCraftableItemDonation(world), 64, 64);
                 for (int i = 0; i < 6; i++) {
                     assert materialItem != null;
                     GiveRandomItemEvent.giveItem(player, materialItem.copy());
