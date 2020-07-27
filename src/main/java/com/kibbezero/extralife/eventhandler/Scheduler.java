@@ -28,18 +28,19 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Scheduler {
 
     private static long ticks = 0;
-    private static HashMap<String, Donation> donations = new HashMap<>();
+    private static ConcurrentHashMap<String, Donation> donations = new ConcurrentHashMap<>();
     private static final Logger LOGGER = LogManager.getLogger();
 
 
     public static void startup() {
         Connection connection = new Connection("https://extralife.donordrive.com");
-        donations = new HashMap<>();
+        donations = new ConcurrentHashMap<>();
         try {
             ArrayList<Participant> participants = new ArrayList<>(Arrays.asList(connection.getTeamParticipants("50922")));
             for (Participant participant : participants){
@@ -83,8 +84,10 @@ public class Scheduler {
                                 //noinspection ConstantConditions
                                 player.getCapability(DonorDriveTagCapability.DONOR_DRIVE_TAG_CAPABILITY).ifPresent(capability -> {
                                     if(capability.getDonorDriveId().equals(remoteDonation.getParticipantID())){
-                                        ProcessDonationEvent(player, remoteDonation);
-                                        donations.put(remoteDonation.getDonationID(), remoteDonation);
+                                        Objects.requireNonNull(world.getServer()).deferTask(() -> {
+                                            ProcessDonationEvent(player, remoteDonation);
+                                            donations.put(remoteDonation.getDonationID(), remoteDonation);
+                                        });
                                     }
                                 });
                             }
@@ -101,9 +104,6 @@ public class Scheduler {
     }
 
     public static void ProcessDonationEvent(PlayerEntity player, Donation donation) {
-
-        Connection connection = new Connection("https://extralife.donordrive.com");
-
         String chosenIncentiveId = donation.getIncentiveID();
 
         if (chosenIncentiveId.isEmpty()){
