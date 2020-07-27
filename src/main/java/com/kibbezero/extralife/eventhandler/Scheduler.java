@@ -75,8 +75,8 @@ public class Scheduler {
 
         return world.getRecipeManager().getRecipes()
                         .stream()
-                        .filter(r -> itemGroups.contains(r.getRecipeOutput().getItem().getGroup()))
                         .map(r -> r.getRecipeOutput().getItem())
+                        .filter(i -> itemGroups.contains(i.getGroup()))
                         .toArray(Item[]::new);
     }
 
